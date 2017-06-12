@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Test</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="packages.js" type="text/javascript"></script>
+        <script src="binary.js" type="text/javascript"></script>
+        <script src="Cipher.js" type="text/javascript"></script>
+
+        <style>
+	    h1 {
+			font-size:20px;
+	    }
+	    h2 {
+			font-size:18px;
+	    }
+	    hr { 
+			border: 0px none white;
+			color:white;
+			border-bottom : 1px dashed silver; 
+			background-color : white;
+			margin:20px;
+	    }
+	    blockquote {
+			border : 0px;
+			margin : 0px;
+			margin-left : 50px;
+	    }
+	</style>
+	<script>
+		
+function hex2a(hexx) {
+    var hex = hexx.toString();
+    var str = '';
+    for (var i = 0; i < hex.length; i += 2)
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    return str;
+}
+
+function a2hex(str) {
+  var result="";
+  for (var i = 0, l = str.length; i < l; i ++) {
+    var hex = '' + Number(str.charCodeAt(i)).toString(16);
+    if (hex.length != 2) hex = "0" + hex;
+    result += hex;
+  }
+  return result;
+}
+
+function a2arr(str)
+{
+	var data = [];
+	for (var i = 0; i < str.length; i++)
+		data.push(str.charCodeAt(i));
+	return data;
+}
+
+function arr2a(bytes) {
+    var str = "";
+    for(var i = 0; i < bytes.length; i++) 
+        str += String.fromCharCode(bytes[i]);
+    return str;
+}
+
+		var Cipher = __import( this, "Cipher" );
+	    
+	    var defaultText = "9CA3BD81B48E45B242A73AF625BD4154DDB823446F7C00F88E68D36D1B5E87C095392B82C6354D7B43F05E814603F563FCF218BE25D931B97F499E5993F3EAD2FF94651EED126144C996317E2F7C26C8B22B88E262D67CCF3C9139B679C2CA4C664EC5980D0795F70ABA248FEDEF0E066AC3818E644C12AC84EF2F8956D2CCB7680A22405823696B4B8A7D16226C76FE637F470487380AFE0DCEA0094BD37B7A10AD80BE04AA8FF402EBC0B9D9056D93350903E62423F9F2887B60AC0CCA6088CF6326D5E80C26869E118A12D0E5CAC8AD9F2DBFDA2FEF13BCC7FCD7D2D28C3D";
+		
+	    function createCipher( directionName ) {
+			var algorithm = Cipher[ document.form1.cipherAlgorithm.value ];
+			var mode  = Cipher[ document.form1.cipherMode.value ];
+			var padding  = Cipher[ document.form1.cipherPadding.value ];
+			var direction = Cipher[ directionName ];
+			var cipher = Cipher.create( algorithm, direction, mode, padding );
+			return cipher;
+	    }
+	    function encrypt() {
+			var cipher = createCipher("ENCRYPT");
+			debugger;
+			var text = a2arr( document.form1.input.value );
+			var key = a2arr(hex2a( document.form1.key64.value ));
+			
+			text = cipher.execute( key, text );
+			var result = a2hex( arr2a(text) );
+			document.form1.output.value = result;
+	    }
+	    function decrypt() {
+			var cipher = createCipher("DECRYPT");
+			debugger;
+			var text = a2arr(hex2a( document.form1.input.value ));
+			var key = a2arr(hex2a( document.form1.key64.value ));
+			
+			text = cipher.execute( key, text);
+			
+			text = binary.utf82str(text);
+			text = a2hex(text);
+			var result = text + "\r\n\r\n" + hex2a(text);
+			document.form1.output.value = result;
+	    }
+	    function generateKey() {
+			var key = '19fce5cc39dcfb063c6b9d8d085fac04503796001d2d40d276d80b5c2b1effd3';
+			document.form1.key64.value = ( key );
+	    }
+	    function outputToInput() {
+			document.form1.input.value = document.form1.output.value;
+			document.form1.output.value = "";
+	    }
+	    function resetText() {
+			document.form1.input.value = defaultText;
+			document.form1.output.value = "";
+	    }
+	    function initialize() {
+			if (document.form1.input.value == "" ) {
+				generateKey();
+			}
+			if (document.form1.input.value == "" ) {
+				resetText();
+			}
+	    }
+	</script>
+    </head>
+    <body onLoad="initialize()">
+	<h1>A JavaScript Block Cipher Algorithms Implementation - DEMO</h1>
+	<ul>
+	    <li>Supports Serpent, Twofish and Rijndael</li>
+	    <li>Supports UTF-8 character encoding</li>
+	</ul>
+	<form name="form1" >
+	    <b>Instruction</b>
+	    <blockquote>
+	    Input text to the upper textarea and click "Encrypt" button.
+	    You will get encrypted text on the lower textarea.
+	    <br>
+	    Copy and Paste the encrypted text to the upper textarea.  Or you
+	    can also use "Swap" button to do it for your convenience.
+	    <br>
+	    Click the "Decrypt" button to decrypt. The result will appear to
+	    the lower textarea.
+
+	    </blockquote>
+	    <b>Input</b><br>
+	    <blockquote>
+	    <textarea name="input" style="width:500px; height:100px"></textarea>
+	    <br>
+	    <table width=500><tr>
+	    <td style="line-height:1.5em;">
+	    <b>Algorithm</b> :
+	    <select name="cipherAlgorithm" >
+		<option value="SERPENT" Selected>Serpent</option>
+		<option value="TWOFISH">Twofish</option>
+		<option value="RIJNDAEL">Rijndael</option>
+	    </select>
+	    <br>
+	    <b>Block Cipher Mode</b> :
+	    <select name="cipherMode">
+		<option value="ECB">ECB</option> 
+		<option value="CBC" selected>CBC</option>
+		<!-- <option value="CFB">CFB</option> -->
+		<!-- <option value="OFB">OFB</option> -->
+		<!-- <option value="CTR">CTR</option> -->
+	    </select>
+	    <br>
+	    <b>Padding</b> :
+	    <select name="cipherPadding">
+		<option value="RFC1321">RFC1321</option>
+		<option value="ANSIX923">ANSIX923</option>
+		<option value="ISO10126">ISO10126</option>
+		<option value="PKCS7" selected>PKCS7</option>
+		<option value="NO_PADDING">NO PADDING</option>
+	    </select>
+
+	    </td>
+	    <td valign="middle" align="right">
+		<input type="button" name="buttonEncrypt" value="Encrypt" onClick="encrypt();">
+		<input type="button" name="copyToInput" value="Swap" onClick="outputToInput();">
+		<input type="button" name="buttonDecrypt" value="Decrypt" onClick="decrypt();">
+		<input type="button" name="resetAll" value="Reset" onClick="resetText();">
+	    </td>
+	    </tr>
+	    </table>
+
+	    </blockquote>
+	    <hr>
+	    <b>Key</b> :
+	    <blockquote>
+	    <input type="text" name="key64" value="19fce5cc39dcfb063c6b9d8d085fac04503796001d2d40d276d80b5c2b1effd3" size=40>
+	    </blockquote>
+	    
+	    
+    
+	    <hr>
+	    <b>Output</b><br>
+	    <blockquote>
+	    <textarea name="output" style="width:500px; height:300px"></textarea>
+	    </blockquote>
+	</form>
+	    <hr>
+	
+    </body>
+</html>
